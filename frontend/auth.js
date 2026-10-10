@@ -1,12 +1,4 @@
-/**
- * Video Blog Content - Authentication Frontend Logic
- */
-
 document.addEventListener('DOMContentLoaded', () => {
-
-    // -----------------------------
-    // Helper Functions
-    // -----------------------------
 
     function setError(inputElement, errorElement, message) {
         if (!inputElement || !errorElement) return;
@@ -28,12 +20,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
+    async function checkSession() {
 
-    // =====================================
-    // REGISTER FORM
-    // =====================================
+        try {
 
-    const registerForm = document.getElementById('register-form');
+            const response = await fetch(
+                'http://127.0.0.1:5000/session',
+                {
+                    method: 'GET',
+                    credentials: 'include'
+                }
+            );
+
+            const result = await response.json();
+
+            if (result.authenticated) {
+
+                VideoBlogStore.updateUser({
+                    user_id: result.user.user_id,
+                    name: result.user.name,
+                    email: result.user.email,
+                    isLoggedIn: true
+                });
+
+                return result.user;
+            }
+
+            VideoBlogStore.updateUser({
+                user_id: null,
+                name: '',
+                email: '',
+                isLoggedIn: false
+            });
+
+            return null;
+
+        } catch (error) {
+
+            console.error('Session check failed:', error);
+
+            return null;
+        }
+    }
+
+    const registerForm =
+        document.getElementById('register-form');
 
     if (registerForm) {
 
@@ -49,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmPasswordInput =
             document.getElementById('reg-confirm-password');
 
-
         const nameError =
             document.getElementById('reg-name-error');
 
@@ -61,9 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const confirmPasswordError =
             document.getElementById('reg-confirm-password-error');
-
-
-        // Remove errors while typing
 
         [
             nameInput,
@@ -84,7 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         );
 
                     if (errorElement) {
+
+                        errorElement.textContent = '';
                         errorElement.classList.remove('visible');
+
                     }
 
                 });
@@ -93,187 +123,198 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
 
+        registerForm.addEventListener(
+            'submit',
+            async (e) => {
 
-        // Register Submit
+                e.preventDefault();
 
-        registerForm.addEventListener('submit', (e) => {
+                let isValid = true;
 
-            e.preventDefault();
+                const name =
+                    nameInput.value.trim();
 
-            let isValid = true;
+                const email =
+                    emailInput.value.trim();
 
+                const password =
+                    passwordInput.value;
 
-            // Name validation
+                const confirmPassword =
+                    confirmPasswordInput.value;
 
-            if (!nameInput.value.trim()) {
+                if (!name) {
 
-                setError(
-                    nameInput,
-                    nameError,
-                    'Name is required.'
-                );
+                    setError(
+                        nameInput,
+                        nameError,
+                        'Name is required.'
+                    );
 
-                isValid = false;
+                    isValid = false;
 
-            } else {
+                } else {
 
-                clearError(
-                    nameInput,
-                    nameError
-                );
+                    clearError(
+                        nameInput,
+                        nameError
+                    );
+
+                }
+
+                if (!email) {
+
+                    setError(
+                        emailInput,
+                        emailError,
+                        'Email address is required.'
+                    );
+
+                    isValid = false;
+
+                } else if (!isValidEmail(email)) {
+
+                    setError(
+                        emailInput,
+                        emailError,
+                        'Please enter a valid email address.'
+                    );
+
+                    isValid = false;
+
+                } else {
+
+                    clearError(
+                        emailInput,
+                        emailError
+                    );
+
+                }
+
+                if (!password) {
+
+                    setError(
+                        passwordInput,
+                        passwordError,
+                        'Password is required.'
+                    );
+
+                    isValid = false;
+
+                } else if (password.length < 6) {
+
+                    setError(
+                        passwordInput,
+                        passwordError,
+                        'Password must be at least 6 characters long.'
+                    );
+
+                    isValid = false;
+
+                } else {
+
+                    clearError(
+                        passwordInput,
+                        passwordError
+                    );
+
+                }
+
+                if (!confirmPassword) {
+
+                    setError(
+                        confirmPasswordInput,
+                        confirmPasswordError,
+                        'Please confirm your password.'
+                    );
+
+                    isValid = false;
+
+                } else if (password !== confirmPassword) {
+
+                    setError(
+                        confirmPasswordInput,
+                        confirmPasswordError,
+                        'Passwords do not match.'
+                    );
+
+                    isValid = false;
+
+                } else {
+
+                    clearError(
+                        confirmPasswordInput,
+                        confirmPasswordError
+                    );
+
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                const submitButton =
+                    document.getElementById(
+                        'register-submit-btn'
+                    );
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Registering...';
+
+                try {
+
+                    const response = await fetch(
+                        'http://127.0.0.1:5000/signup',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                password: password
+                            })
+                        }
+                    );
+
+                    const result =
+                        await response.json();
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            'Registration failed.'
+                        );
+
+                    }
+
+                    alert(
+                        'Registration successful. Please login.'
+                    );
+
+                    window.location.href =
+                        'login.html';
+
+                } catch (error) {
+
+                    setError(
+                        emailInput,
+                        emailError,
+                        error.message
+                    );
+
+                } finally {
+
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Register';
+
+                }
 
             }
-
-
-            // Email validation
-
-            if (!emailInput.value.trim()) {
-
-                setError(
-                    emailInput,
-                    emailError,
-                    'Email address is required.'
-                );
-
-                isValid = false;
-
-            } else if (
-                !isValidEmail(
-                    emailInput.value.trim()
-                )
-            ) {
-
-                setError(
-                    emailInput,
-                    emailError,
-                    'Please enter a valid email address.'
-                );
-
-                isValid = false;
-
-            } else {
-
-                clearError(
-                    emailInput,
-                    emailError
-                );
-
-            }
-
-
-            // Password validation
-
-            if (!passwordInput.value) {
-
-                setError(
-                    passwordInput,
-                    passwordError,
-                    'Password is required.'
-                );
-
-                isValid = false;
-
-            } else if (
-                passwordInput.value.length < 6
-            ) {
-
-                setError(
-                    passwordInput,
-                    passwordError,
-                    'Password must be at least 6 characters long.'
-                );
-
-                isValid = false;
-
-            } else {
-
-                clearError(
-                    passwordInput,
-                    passwordError
-                );
-
-            }
-
-
-            // Confirm password validation
-
-            if (!confirmPasswordInput.value) {
-
-                setError(
-                    confirmPasswordInput,
-                    confirmPasswordError,
-                    'Please confirm your password.'
-                );
-
-                isValid = false;
-
-            } else if (
-                passwordInput.value !==
-                confirmPasswordInput.value
-            ) {
-
-                setError(
-                    confirmPasswordInput,
-                    confirmPasswordError,
-                    'Passwords do not match.'
-                );
-
-                isValid = false;
-
-            } else {
-
-                clearError(
-                    confirmPasswordInput,
-                    confirmPasswordError
-                );
-
-            }
-
-
-            // If everything is valid
-
-            if (isValid) {
-
-                const userData = {
-
-                    name: nameInput.value.trim(),
-
-                    email: emailInput.value.trim(),
-
-                    isLoggedIn: false
-
-                };
-
-
-                // Save user using app.js store
-
-                VideoBlogStore.updateUser(userData);
-
-
-                // Success message
-
-                sessionStorage.setItem(
-                    'videoblog_flash_msg',
-                    JSON.stringify({
-                        text: 'Registration successful. Please login.',
-                        type: 'success'
-                    })
-                );
-
-
-                // Go to Login
-
-                window.location.href = 'login.html';
-            }
-
-        });
-
+        );
     }
-
-
-    // =====================================
-    // LOGIN FORM
-    // =====================================
 
     const loginForm =
         document.getElementById('login-form');
@@ -286,15 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const passwordInput =
             document.getElementById('login-password');
 
-
         const emailError =
             document.getElementById('login-email-error');
 
         const passwordError =
             document.getElementById('login-password-error');
-
-
-        // Remove errors while typing
 
         [
             emailInput,
@@ -313,7 +350,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         );
 
                     if (errorElement) {
+
+                        errorElement.textContent = '';
                         errorElement.classList.remove('visible');
+
                     }
 
                 });
@@ -322,113 +362,218 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
 
+        loginForm.addEventListener(
+            'submit',
+            async (e) => {
 
-        // Login Submit
+                e.preventDefault();
 
-        loginForm.addEventListener('submit', (e) => {
+                let isValid = true;
 
-            e.preventDefault();
+                const email =
+                    emailInput.value.trim();
 
-            let isValid = true;
+                const password =
+                    passwordInput.value;
 
+                if (!email) {
 
-            // Email validation
+                    setError(
+                        emailInput,
+                        emailError,
+                        'Email address is required.'
+                    );
 
-            if (!emailInput.value.trim()) {
+                    isValid = false;
 
-                setError(
-                    emailInput,
-                    emailError,
-                    'Email address is required.'
-                );
+                } else if (!isValidEmail(email)) {
 
-                isValid = false;
+                    setError(
+                        emailInput,
+                        emailError,
+                        'Please enter a valid email address.'
+                    );
 
-            } else if (
-                !isValidEmail(
-                    emailInput.value.trim()
-                )
-            ) {
+                    isValid = false;
 
-                setError(
-                    emailInput,
-                    emailError,
-                    'Please enter a valid email address.'
-                );
+                } else {
 
-                isValid = false;
+                    clearError(
+                        emailInput,
+                        emailError
+                    );
 
-            } else {
+                }
 
-                clearError(
-                    emailInput,
-                    emailError
-                );
+                if (!password) {
+
+                    setError(
+                        passwordInput,
+                        passwordError,
+                        'Password is required.'
+                    );
+
+                    isValid = false;
+
+                } else {
+
+                    clearError(
+                        passwordInput,
+                        passwordError
+                    );
+
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                const submitButton =
+                    document.getElementById(
+                        'login-submit-btn'
+                    );
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Logging in...';
+
+                try {
+
+                    const response = await fetch(
+                        'http://127.0.0.1:5000/login',
+                        {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: email,
+                                password: password
+                            })
+                        }
+                    );
+
+                    const result =
+                        await response.json();
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            'Login failed.'
+                        );
+
+                    }
+
+                    VideoBlogStore.updateUser({
+                        user_id: result.user.user_id,
+                        name: result.user.name,
+                        email: result.user.email,
+                        isLoggedIn: true
+                    });
+
+                    window.location.href =
+                        'dashboard.html';
+
+                } catch (error) {
+
+                    setError(
+                        passwordInput,
+                        passwordError,
+                        error.message
+                    );
+
+                } finally {
+
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Login';
+
+                }
 
             }
+        );
+    }
 
+    const profileForm =
+        document.getElementById('profile-form');
 
-            // Password validation
+    if (profileForm) {
 
-            if (!passwordInput.value) {
+        const nameInput =
+            document.getElementById('profile-name');
 
-                setError(
-                    passwordInput,
-                    passwordError,
-                    'Password is required.'
-                );
+        const emailInput =
+            document.getElementById('profile-email');
 
-                isValid = false;
+        const logoutBtn =
+            document.getElementById('profile-logout-btn');
 
-            } else {
+        checkSession().then(user => {
 
-                clearError(
-                    passwordInput,
-                    passwordError
-                );
-
-            }
-
-
-            // Login success
-
-            if (isValid) {
-
-                const existingUser =
-                    VideoBlogStore.getUser();
-
-
-                VideoBlogStore.updateUser({
-
-                    ...existingUser,
-
-                    email: emailInput.value.trim(),
-
-                    isLoggedIn: true
-
-                });
-
-
-                // Success message
-
-                sessionStorage.setItem(
-                    'videoblog_flash_msg',
-                    JSON.stringify({
-                        text:
-                            'Welcome to your Video Blog Content Dashboard!',
-                        type: 'success'
-                    })
-                );
-
-
-                // Go to Dashboard
+            if (!user) {
 
                 window.location.href =
-                    'dashboard.html';
+                    'login.html';
 
+                return;
+            }
+
+            if (nameInput) {
+                nameInput.value =
+                    user.name || '';
+            }
+
+            if (emailInput) {
+                emailInput.value =
+                    user.email || '';
             }
 
         });
+
+        if (logoutBtn) {
+
+            logoutBtn.addEventListener(
+                'click',
+                async () => {
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                'http://127.0.0.1:5000/logout',
+                                {
+                                    method: 'POST',
+                                    credentials: 'include'
+                                }
+                            );
+
+                        const result =
+                            await response.json();
+
+                        if (result.success) {
+
+                            VideoBlogStore.updateUser({
+                                user_id: null,
+                                name: '',
+                                email: '',
+                                isLoggedIn: false
+                            });
+
+                            window.location.href =
+                                'login.html';
+
+                        }
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                    }
+
+                }
+            );
+
+        }
 
     }
 

@@ -1,7 +1,8 @@
 const DEFAULT_USER = {
-    name: 'Alex Johnson',
-    email: 'alex.johnson@example.com',
-    isLoggedIn: true
+    user_id: null,
+    name: '',
+    email: '',
+    isLoggedIn: false
 };
 
 const STORAGE_KEYS = {
@@ -10,7 +11,6 @@ const STORAGE_KEYS = {
     TEMP_VIDEO: 'videoblog_temp_video',
     CURRENT_BLOG_ID: 'videoblog_current_blog_id'
 };
-
 
 const VideoBlogStore = {
 
@@ -31,7 +31,6 @@ const VideoBlogStore = {
         }
 
     },
-
 
     getUser() {
 
@@ -56,7 +55,6 @@ const VideoBlogStore = {
 
     },
 
-
     updateUser(user) {
 
         localStorage.setItem(
@@ -67,6 +65,5 @@ const VideoBlogStore = {
     }
 
 };
-
 
 VideoBlogStore.init();

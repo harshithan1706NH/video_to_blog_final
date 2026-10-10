@@ -18,3 +18,4 @@ processing/
 # Audio/video files
 *.wav
 *.mp4
+parakeet-env/
