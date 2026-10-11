@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Video to Blog Content</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <div class="logo">Video to Blog Content</div>
+
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Log in to continue creating blog content from videos.</p>
+
+        <form id="login-form" novalidate>
+            <div class="form-group">
+                <label for="login-email">Email Address</label>
+                <input
+                    type="email"
+                    id="login-email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+                <small id="login-email-error" class="error-message"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+                <small id="login-password-error" class="error-message"></small>
+            </div>
+
+            <button type="submit" id="login-submit-btn">Log In</button>
+        </form>
+
+        <p class="bottom-text">
+            Don't have an account?
+            <a href="register.html">Create an account</a>
+        </p>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
