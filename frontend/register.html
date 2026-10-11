@@ -1,0 +1,87 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Video to Blog Content</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <div class="logo">Video to Blog Content</div>
+
+        <h2>Create an Account</h2>
+        <p class="subtitle">Register to turn your videos into blog content.</p>
+
+        <form id="register-form" novalidate>
+            <div class="form-group">
+                <label for="reg-name">Full Name</label>
+                <input
+                    type="text"
+                    id="reg-name"
+                    name="name"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required
+                >
+                <small id="reg-name-error" class="error-message"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-email">Email Address</label>
+                <input
+                    type="email"
+                    id="reg-email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+                <small id="reg-email-error" class="error-message"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input
+                    type="password"
+                    id="reg-password"
+                    name="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    required
+                >
+                <small id="reg-password-error" class="error-message"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-confirm-password">Confirm Password</label>
+                <input
+                    type="password"
+                    id="reg-confirm-password"
+                    name="confirm-password"
+                    placeholder="Re-enter your password"
+                    autocomplete="new-password"
+                    required
+                >
+                <small
+                    id="reg-confirm-password-error"
+                    class="error-message"
+                ></small>
+            </div>
+
+            <button type="submit" id="register-submit-btn">
+                Create Account
+            </button>
+        </form>
+
+        <p class="bottom-text">
+            Already have an account?
+            <a href="login.html">Log in</a>
+        </p>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
