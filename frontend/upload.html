@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Upload Video - Video Blog Content</title>
+
+  <meta
+    name="description"
+    content="Upload an MP4 video (up to 30 minutes) to convert into video blog content."
+  />
+
+  <link rel="icon" type="image/png" href="assets/logo-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-container">
+
+      <a href="dashboard.html" class="navbar-brand">
+        <img src="assets/logo-icon.png" alt="Video Blog Content Logo" />
+        <span>Video Blog Content</span>
+      </a>
+
+      <button class="mobile-menu-btn" aria-label="Toggle Navigation">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="upload.html" class="nav-link">Upload Video</a></li>
+        <li><a href="my-blogs.html" class="nav-link">My Blogs</a></li>
+        <li><a href="profile.html" class="nav-link">Profile</a></li>
+        <li>
+          <a href="login.html" class="btn btn-sm btn-secondary">Logout</a>
+        </li>
+      </ul>
+
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container container-narrow">
+
+      <div style="margin-bottom: 1.25rem;">
+        <a
+          href="dashboard.html"
+          class="nav-link"
+          style="display: inline-flex; align-items: center; gap: 0.35rem;"
+        >
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <div class="upload-card">
+
+        <div
+          class="section-header"
+          style="text-align: left; margin-bottom: 1.75rem;"
+        >
+          <h1>Upload Your Video</h1>
+          <p>
+            Upload an MP4 video with a maximum duration of 30 minutes
+            to generate video blog content.
+          </p>
+        </div>
+
+        <div
+          class="alert alert-danger"
+          id="upload-error-alert"
+          style="display: none;"
+        >
+          <span style="font-weight: bold;">✕</span>
+          <span id="upload-error-text">
+            Only MP4 videos are supported.
+          </span>
+        </div>
+
+        <div class="dropzone-container" id="upload-dropzone">
+
+          <input
+            type="file"
+            id="video-file-input"
+            accept="video/mp4,.mp4"
+            style="display: none;"
+          />
+
+          <div class="dropzone-icon">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+
+          <div class="dropzone-text-primary">
+            Upload Video
+          </div>
+
+          <div class="dropzone-text-sub">
+            Drag and drop your video here<br />
+            <span
+              style="font-size: 0.85rem; color: var(--color-text-muted);"
+            >
+              OR
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="browse-video-btn"
+          >
+            Choose Video
+          </button>
+
+          <div class="dropzone-meta">
+            Supported format: <strong>MP4</strong>
+            &nbsp;|&nbsp;
+            Maximum duration: <strong>30 minutes</strong>
+          </div>
+
+        </div>
+
+        <div
+          class="file-preview-card"
+          id="file-preview-card"
+          style="display: none;"
+        >
+
+          <div class="file-preview-details">
+
+            <div>
+              <div class="file-info-name" id="preview-file-name">
+                video.mp4
+              </div>
+
+              <div class="file-info-meta">
+                <span id="preview-file-size">12.5 MB</span>
+                &nbsp;•&nbsp;
+                <span id="preview-file-duration">
+                  Duration: 14:20
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-sm btn-danger-outline"
+              id="remove-video-btn"
+            >
+              Remove
+            </button>
+
+          </div>
+
+          <div class="video-preview-wrapper">
+            <video
+              id="video-preview-player"
+              controls
+              preload="metadata"
+            ></video>
+          </div>
+
+          <div class="upload-actions">
+
+            <a
+              href="dashboard.html"
+              class="btn btn-secondary"
+            >
+              Cancel
+            </a>
+
+            <button
+              type="button"
+              class="btn btn-primary btn-lg"
+              id="start-processing-btn"
+            >
+              Start Processing →
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+
+      <div class="footer-brand-info">
+        <img
+          src="assets/logo-icon.png"
+          alt="Video Blog Content"
+          width="28"
+          height="28"
+        />
+        <span>Video Blog Content</span>
+      </div>
+
+      <p class="footer-text">
+        &copy; 2026 Video Blog Content. Frontend Prototype.
+      </p>
+
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="upload.js"></script>
+
+</body>
+</html>
