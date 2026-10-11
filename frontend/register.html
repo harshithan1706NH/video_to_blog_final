@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,77 +7,123 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="container">
-        <div class="logo">Video to Blog Content</div>
 
-        <h2>Create an Account</h2>
-        <p class="subtitle">Register to turn your videos into blog content.</p>
+    <main class="auth-page-container">
+        <section class="auth-card">
 
-        <form id="register-form" novalidate>
-            <div class="form-group">
-                <label for="reg-name">Full Name</label>
-                <input
-                    type="text"
-                    id="reg-name"
-                    name="name"
-                    placeholder="Enter your full name"
-                    autocomplete="name"
-                    required
-                >
-                <small id="reg-name-error" class="error-message"></small>
-            </div>
+            <header class="auth-header">
+                <a href="logo.html"
+                   style="font-size: 1.25rem; font-weight: 700;">
+                    Video to Blog Content
+                </a>
 
-            <div class="form-group">
-                <label for="reg-email">Email Address</label>
-                <input
-                    type="email"
-                    id="reg-email"
-                    name="email"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    required
-                >
-                <small id="reg-email-error" class="error-message"></small>
-            </div>
+                <h1>Create an Account</h1>
+                <p>Register to turn your videos into blog content.</p>
+            </header>
 
-            <div class="form-group">
-                <label for="reg-password">Password</label>
-                <input
-                    type="password"
-                    id="reg-password"
-                    name="password"
-                    placeholder="Create a password"
-                    autocomplete="new-password"
-                    required
-                >
-                <small id="reg-password-error" class="error-message"></small>
-            </div>
+            <form id="register-form" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="reg-name">
+                        Full Name
+                    </label>
 
-            <div class="form-group">
-                <label for="reg-confirm-password">Confirm Password</label>
-                <input
-                    type="password"
-                    id="reg-confirm-password"
-                    name="confirm-password"
-                    placeholder="Re-enter your password"
-                    autocomplete="new-password"
-                    required
-                >
-                <small
-                    id="reg-confirm-password-error"
-                    class="error-message"
-                ></small>
-            </div>
+                    <input
+                        class="form-control"
+                        type="text"
+                        id="reg-name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        required
+                    >
 
-            <button type="submit" id="register-submit-btn">
-                Create Account
-            </button>
-        </form>
+                    <small
+                        id="reg-name-error"
+                        class="form-error"
+                        aria-live="polite">
+                    </small>
+                </div>
 
-        <p class="bottom-text">
-            Already have an account?
-            <a href="login.html">Log in</a>
-        </p>
+                <div class="form-group">
+                    <label class="form-label" for="reg-email">
+                        Email Address
+                    </label>
+
+                    <input
+                        class="form-control"
+                        type="email"
+                        id="reg-email"
+                        name="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <small
+                        id="reg-email-error"
+                        class="form-error"
+                        aria-live="polite">
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="reg-password">
+                        Password
+                    </label>
+
+                    <input
+                        class="form-control"
+                        type="password"
+                        id="reg-password"
+                        name="password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <small
+                        id="reg-password-error"
+                        class="form-error"
+                        aria-live="polite">
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="reg-confirm-password">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        class="form-control"
+                        type="password"
+                        id="reg-confirm-password"
+                        name="confirm-password"
+                        placeholder="Re-enter your password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <small
+                        id="reg-confirm-password-error"
+                        class="form-error"
+                        aria-live="polite">
+                    </small>
+                </div>
+
+                <button
+                    type="submit"
+                    id="register-submit-btn"
+                    class="btn btn-primary btn-block">
+                    Create Account
+                </button>
+            </form>
+
+            <footer class="auth-footer">
+                Already have an account?
+                <a href="login.html">Log in</a>
+            </footer>
+
+        </section>
     </main>
 
     <script src="app.js"></script>
