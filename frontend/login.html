@@ -7,46 +7,79 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="container">
-        <div class="logo">Video to Blog Content</div>
 
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Log in to continue creating blog content from videos.</p>
+    <main class="auth-page-container">
+        <section class="auth-card">
 
-        <form id="login-form" novalidate>
-            <div class="form-group">
-                <label for="login-email">Email Address</label>
-                <input
-                    type="email"
-                    id="login-email"
-                    name="email"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    required
-                >
-                <small id="login-email-error" class="error-message"></small>
-            </div>
+            <header class="auth-header">
+                <a href="logo.html"
+                   style="font-size: 1.25rem; font-weight: 700;">
+                    Video to Blog Content
+                </a>
 
-            <div class="form-group">
-                <label for="login-password">Password</label>
-                <input
-                    type="password"
-                    id="login-password"
-                    name="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
-                <small id="login-password-error" class="error-message"></small>
-            </div>
+                <h1>Welcome Back</h1>
+                <p>Log in to continue creating blog content from videos.</p>
+            </header>
 
-            <button type="submit" id="login-submit-btn">Log In</button>
-        </form>
+            <form id="login-form" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="login-email">
+                        Email Address
+                    </label>
 
-        <p class="bottom-text">
-            Don't have an account?
-            <a href="register.html">Create an account</a>
-        </p>
+                    <input
+                        class="form-control"
+                        type="email"
+                        id="login-email"
+                        name="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <small
+                        id="login-email-error"
+                        class="form-error"
+                        aria-live="polite">
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="login-password">
+                        Password
+                    </label>
+
+                    <input
+                        class="form-control"
+                        type="password"
+                        id="login-password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <small
+                        id="login-password-error"
+                        class="form-error"
+                        aria-live="polite">
+                    </small>
+                </div>
+
+                <button
+                    type="submit"
+                    id="login-submit-btn"
+                    class="btn btn-primary btn-block">
+                    Log In
+                </button>
+            </form>
+
+            <footer class="auth-footer">
+                Don't have an account?
+                <a href="register.html">Create an account</a>
+            </footer>
+
+        </section>
     </main>
 
     <script src="app.js"></script>
