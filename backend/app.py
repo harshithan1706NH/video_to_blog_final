@@ -17,20 +17,10 @@ if not app.secret_key:
 CORS(
     app,
     supports_credentials=True,
-    origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500"
-    ]
 )
-
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = False
-
-
 @app.route("/signup", methods=["POST"])
 def signup():
-    data = request.get_json(silent=True) or {}
+    data = request.get_json()
 
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
@@ -94,7 +84,7 @@ def signup():
         if conn:
             conn.rollback()
 
-        app.logger.exception("Signup failed")
+        
 
         return jsonify({
             "success": False,
@@ -108,7 +98,7 @@ def signup():
 
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json(silent=True) or {}
+    data = request.get_json()
 
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
@@ -142,7 +132,6 @@ def login():
                 "message": "Invalid email or password"
             }), 401
 
-        session.clear()
         session["user_id"] = user[0]
         session["user_name"] = user[1]
         session["user_email"] = user[2]
@@ -158,7 +147,7 @@ def login():
         }), 200
 
     except Exception:
-        app.logger.exception("Login failed")
+        
 
         return jsonify({
             "success": False,
