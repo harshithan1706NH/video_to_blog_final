@@ -6,15 +6,18 @@ from pathlib import Path
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+from db import get_db_connection
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024
 
 UPLOAD_DIR = BASE_DIR / "uploads"
@@ -28,6 +31,173 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True,
 )
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    data = request.get_json() 
+
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    if not name or not email or not password:
+        return jsonify({
+            "success": False,
+            "message": "Name, email and password are required.",
+        }), 400
+
+    if len(password) < 6:
+        return jsonify({
+            "success": False,
+            "message": "Password must contain at least 8 characters.",
+        }), 400
+
+    connection = None
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "SELECT user_id FROM users WHERE email = %s",
+            (email,),
+        )
+
+        if cursor.fetchone():
+            cursor.close()
+            return jsonify({
+                "success": False,
+                "message": "An account with this email already exists.",
+            }), 409
+
+        password_hash = generate_password_hash(password)
+
+        cursor.execute(
+            """
+            INSERT INTO users (name, email, password_hash)
+            VALUES (%s, %s, %s)
+            RETURNING user_id
+            """,
+            (name, email, password_hash),
+        )
+
+        user_id = cursor.fetchone()[0]
+        connection.commit()
+        cursor.close()
+
+        return jsonify({
+            "success": True,
+            "message": "Account created successfully.",
+            "user_id": user_id,
+        }), 201
+
+    except Exception:
+        if connection:
+            connection.rollback()
+
+       
+
+        return jsonify({
+            "success": False,
+            "message": "Registration failed. Please try again.",
+        }), 500
+
+    finally:
+        if connection:
+            connection.close()
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    if not email or not password:
+        return jsonify({
+            "success": False,
+            "message": "Email and password are required.",
+        }), 400
+
+    connection = None
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            SELECT user_id, name, email, password_hash
+            FROM users
+            WHERE email = %s
+            """,
+            (email,),
+        )
+
+        user = cursor.fetchone()
+        cursor.close()
+
+        if not user or not check_password_hash(user[3], password):
+            return jsonify({
+                "success": False,
+                "message": "Invalid email or password.",
+            }), 401
+
+        session.clear()
+        session["user_id"] = user[0]
+        session["user_name"] = user[1]
+        session["user_email"] = user[2]
+
+        return jsonify({
+            "success": True,
+            "message": "Login successful.",
+            "user": {
+                "user_id": user[0],
+                "name": user[1],
+                "email": user[2],
+            },
+        }), 200
+
+    except Exception:
+        
+
+        return jsonify({
+            "success": False,
+            "message": "Login failed. Please try again.",
+        }), 500
+
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route("/session", methods=["GET"])
+def check_session():
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "logged_in": False,
+            "message": "User is not logged in.",
+        }), 401
+
+    return jsonify({
+        "success": True,
+        "logged_in": True,
+        "user": {
+            "user_id": session["user_id"],
+            "name": session["user_name"],
+            "email": session["user_email"],
+        },
+    }), 200
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+
+    return jsonify({
+        "success": True,
+        "message": "Logged out successfully.",
+    }), 200
 
 @app.route("/upload", methods=["POST"])
 def upload_video():
