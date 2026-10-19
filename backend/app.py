@@ -2,7 +2,9 @@
 import uuid
 import subprocess
 from pathlib import Path
-
+import sys
+from audio_chunker import chunk_audio
+import re
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
@@ -11,6 +13,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_db_connection
+from blog_generator import generate_blog, save_blog
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
@@ -31,6 +34,18 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True,
 )
+def is_valid_email(email):
+    pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
+    return re.fullmatch(pattern, email) is not None
+
+def is_valid_password(password):
+    return (
+        len(password) == 6
+        and password.isalnum()
+        and any(c.isalpha() for c in password)
+        and any(c.isdigit() for c in password)
+    )
+
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -46,10 +61,19 @@ def signup():
             "message": "Name, email and password are required.",
         }), 400
 
-    if len(password) < 6:
+    if not is_valid_email(email):
         return jsonify({
             "success": False,
-            "message": "Password must contain at least 8 characters.",
+            "message": "Please enter a valid email address."
+        }), 400
+
+    if not is_valid_password(password):
+        return jsonify({
+            "success": False,
+            "message": (
+                "Password must be exactly 6 characters "
+                "and contain both letters and numbers."
+            )
         }), 400
 
     connection = None
@@ -92,6 +116,9 @@ def signup():
         }), 201
 
     except Exception:
+        import traceback
+        traceback.print_exc()
+        print("Signup error:", e)
         if connection:
             connection.rollback()
 
@@ -201,6 +228,15 @@ def logout():
 
 @app.route("/upload", methods=["POST"])
 def upload_video():
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please log in before uploading a video."
+        }), 401
+
+    
+    connection = None
+    cursor = None
     video_path = None
 
     try:
@@ -264,6 +300,27 @@ def upload_video():
             folder="video_to_blog",
             public_id=video_id,
         )
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            INSERT INTO videos
+                (user_id, filename, format, duration_seconds, cloudinary_url)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING video_id, uploaded_at
+            """,
+            (
+                session["user_id"],
+                filename,
+                "mp4",
+                int(round(duration)),
+                result["secure_url"],
+            ),
+        )
+
+        db_video_id, uploaded_at = cursor.fetchone()
+        connection.commit()
 
         subprocess.run(
             [
@@ -273,17 +330,151 @@ def upload_video():
             ],
             capture_output=True, text=True, check=True,
         )
+                
+        video_processing_dir = AUDIO_DIR / video_id
+        chunks_dir = video_processing_dir / "chunks"
+        transcripts_dir = video_processing_dir / "transcripts"
+
+        chunks_dir.mkdir(parents=True, exist_ok=True)
+        transcripts_dir.mkdir(parents=True, exist_ok=True)
+
+        
+        video_audio_path = video_processing_dir / f"{video_id}.wav"
+        os.replace(audio_path, video_audio_path)
+
+        
+        chunks = chunk_audio(
+            str(video_audio_path),
+            str(chunks_dir),
+            duration_seconds=duration,
+        )
+        for chunk in chunks:
+            cursor.execute(
+                """
+                INSERT INTO audio_chunks
+                    (
+                        video_id,
+                        chunk_number,
+                        start_time_seconds,
+                        end_time_seconds,
+                        chunk_filename
+                    )
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING audio_chunk_id
+                """,
+                (
+                    db_video_id,
+                    chunk["chunk_number"],
+                    chunk["start_time_seconds"],
+                    chunk["end_time_seconds"],
+                    chunk["filename"],
+                ),
+            )
+
+            chunk["audio_chunk_id"] = cursor.fetchone()[0]
+
+        connection.commit()
+       
+        parakeet_python = os.getenv(
+            "PARAKEET_PYTHON",
+            sys.executable,
+        )
+
+        transcriber_script = BASE_DIR / "parakeet_transcriber.py"
+
+        subprocess.run(
+            [
+                parakeet_python,
+                str(transcriber_script),
+                str(chunks_dir),
+                str(transcripts_dir),
+            ],
+            check=True,
+        )
+        transcript_parts = []
+        transcript_files = []
+
+        for chunk in chunks:
+            transcript_path = (
+                transcripts_dir
+                / f"chunk_{chunk['chunk_number']:03d}.txt"
+            )
+
+            if not transcript_path.is_file():
+                raise FileNotFoundError(
+                    f"Transcript missing for chunk {chunk['chunk_number']}"
+                )
+
+            transcript_text = transcript_path.read_text(
+                encoding="utf-8"
+            ).strip()
+
+            
+            cursor.execute(
+                """
+                INSERT INTO transcripts
+                    (video_id, transcript_text, audio_chunk_id)
+                VALUES (%s, %s, %s)
+                """,
+                (
+                    db_video_id,
+                    transcript_text,
+                    chunk["audio_chunk_id"],
+                ),
+            )
+
+            transcript_parts.append(transcript_text)
+            transcript_files.append(str(transcript_path))
+
+        connection.commit()
+
+    
+        combined_transcript = "\n\n".join(transcript_parts)
+
+        
+        cursor.execute(
+            """
+            UPDATE videos
+            SET combined_transcript = %s
+            WHERE video_id = %s
+            """,
+            (combined_transcript, db_video_id),
+        )
+
+        connection.commit()
+                
+        title, content = generate_blog(combined_transcript)
+
+        
+        blog = save_blog(
+            video_id=db_video_id,
+            user_id=session["user_id"],
+            title=title,
+            content=content,
+        )
 
         return jsonify({
             "success": True,
-            "message": "Video uploaded and audio extracted.",
+            "message": "Video uploaded and transcription saved successfully.",
+            "video_id": db_video_id,
             "filename": filename,
             "duration_seconds": duration,
             "public_id": result["public_id"],
             "video_url": result["secure_url"],
-            "audio_file": str(audio_path),
-        })
-
+            "audio_file": str(video_audio_path),
+            "chunks": [
+                {
+                    "audio_chunk_id": chunk["audio_chunk_id"],
+                    "chunk_number": chunk["chunk_number"],
+                }
+                for chunk in chunks
+            ],
+            "transcript_files": transcript_files,
+            "combined_transcript": combined_transcript,
+            "blog":blog,
+        }), 200
+        
+        
     except subprocess.CalledProcessError:
         app.logger.exception("FFmpeg/FFprobe error")
         return jsonify({
@@ -297,6 +488,12 @@ def upload_video():
             "message": "Upload failed. Check backend settings and logs.",
         }), 500
     finally:
+        if cursor:
+            cursor.close()
+
+        if connection:
+            connection.close()
+
         if video_path and video_path.exists():
             video_path.unlink(missing_ok=True)
 
