@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>My Profile - Video Blog Content</title>
+
+  <meta
+    name="description"
+    content="Manage your account profile information and settings."
+  />
+
+  <link rel="icon" type="image/png" href="logo-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-container">
+
+      <a href="dashboard.html" class="navbar-brand">
+        <img src="logo.svg" alt="Video Blog Content Logo" />
+        <span>Video Blog Content</span>
+      </a>
+
+      <button class="mobile-menu-btn" aria-label="Toggle Navigation">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="upload.html" class="nav-link">Upload Video</a></li>
+        <li><a href="my-blogs.html" class="nav-link">My Blogs</a></li>
+        <li><a href="profile.html" class="nav-link">Profile</a></li>
+        <li>
+          <a href="login.html" class="btn btn-sm btn-secondary">
+            Logout
+          </a>
+        </li>
+      </ul>
+
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <div class="container container-sm">
+
+      <div class="card">
+
+        <div
+          class="section-header"
+          style="text-align: left; margin-bottom: 1.75rem;"
+        >
+          <h1>My Profile</h1>
+          <p>Account details and preferences.</p>
+        </div>
+
+        <form id="profile-form">
+
+          <div class="form-group">
+            <label for="profile-name" class="form-label">
+              Full Name
+            </label>
+
+            <input
+              type="text"
+              id="profile-name"
+              class="form-control"
+              value="ram"
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="profile-email" class="form-label">
+              Email Address
+            </label>
+
+            <input
+              type="email"
+              id="profile-email"
+              class="form-control"
+              value="ram@example.com"
+              readonly
+            />
+          </div>
+
+          <div
+            style="
+              display: flex;
+              gap: 0.75rem;
+              margin-top: 2rem;
+              flex-wrap: wrap;
+            "
+          >
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="profile-edit-btn"
+            >
+              Edit Profile
+            </button>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="profile-save-btn"
+              disabled
+            >
+              Save Changes
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-danger-outline"
+              id="profile-logout-btn"
+              style="margin-left: auto;"
+            >
+              Logout
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+
+      <div class="footer-brand-info">
+        <img
+          src="logo.svg"
+          alt="Video Blog Content"
+          width="24"
+          height="24"
+        />
+        <span>Video Blog Content</span>
+      </div>
+
+      <p class="footer-text">
+        &copy; 2026 Video Blog Content. Frontend Prototype.
+      </p>
+
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+
+</body>
+</html>
