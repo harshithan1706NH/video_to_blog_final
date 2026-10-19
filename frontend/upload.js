@@ -1,342 +1,195 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const dropzone = document.getElementById('upload-dropzone');
-  const fileInput = document.getElementById('video-file-input');
-  const browseBtn = document.getElementById('browse-video-btn');
-  const errorAlert = document.getElementById('upload-error-alert');
-  const errorMessage = document.getElementById('upload-error-text');
 
-  const previewCard = document.getElementById('file-preview-card');
-  const previewVideo = document.getElementById('video-preview-player');
-  const fileNameDisplay = document.getElementById('preview-file-name');
-  const fileSizeDisplay = document.getElementById('preview-file-size');
-  const fileDurationDisplay = document.getElementById('preview-file-duration');
-  const removeVideoBtn = document.getElementById('remove-video-btn');
-  const startProcessingBtn = document.getElementById('start-processing-btn');
+document.addEventListener("DOMContentLoaded", () => {
+    const fileInput = document.getElementById("video-file-input");
+    const dropzone = document.getElementById("upload-dropzone");
+    const browseButton = document.getElementById("browse-video-btn");
+    const previewCard = document.getElementById("file-preview-card");
+    const previewName = document.getElementById("preview-file-name");
+    const previewSize = document.getElementById("preview-file-size");
+    const previewDuration = document.getElementById("preview-file-duration");
+    const previewPlayer = document.getElementById("video-preview-player");
+    const removeButton = document.getElementById("remove-video-btn");
+    const uploadButton = document.getElementById("start-processing-btn");
+    const errorAlert = document.getElementById("upload-error-alert");
+    const errorText = document.getElementById("upload-error-text");
 
-  let currentVideoFile = null;
-  let currentVideoDuration = 0;
-  let currentObjectUrl = null;
+    let selectedFile = null;
+    let previewUrl = null;
 
-  function formatBytes(bytes, decimals = 2) {
-    if (!+bytes) return '0 Bytes';
+    browseButton.addEventListener("click", () => fileInput.click());
 
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return `${parseFloat(
-      (bytes / Math.pow(k, i)).toFixed(dm)
-    )} ${sizes[i]}`;
-  }
-
-  function formatDuration(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  }
-
-  function showError(msg) {
-    if (errorMessage && errorAlert) {
-      errorMessage.textContent = msg;
-      errorAlert.style.display = 'flex';
-
-      errorAlert.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-      });
-    }
-  }
-
-  function hideError() {
-    if (errorAlert) {
-      errorAlert.style.display = 'none';
-    }
-  }
-
-  function resetUpload() {
-    currentVideoFile = null;
-    currentVideoDuration = 0;
-
-    if (currentObjectUrl) {
-      URL.revokeObjectURL(currentObjectUrl);
-      currentObjectUrl = null;
-    }
-
-    if (fileInput) {
-      fileInput.value = '';
-    }
-
-    if (previewCard) {
-      previewCard.style.display = 'none';
-    }
-
-    if (dropzone) {
-      dropzone.style.display = 'block';
-    }
-
-    if (previewVideo) {
-      previewVideo.removeAttribute('src');
-      previewVideo.load();
-    }
-
-    hideError();
-  }
-
-  function handleFile(file) {
-    hideError();
-
-    if (!file) {
-      return;
-    }
-
-    const isMp4 =
-      file.type === 'video/mp4' ||
-      file.name.toLowerCase().endsWith('.mp4');
-
-    if (!isMp4) {
-      showError('Only MP4 videos are supported.');
-      return;
-    }
-
-    const tempVideo = document.createElement('video');
-
-    tempVideo.preload = 'metadata';
-
-    const objectUrl = URL.createObjectURL(file);
-
-    tempVideo.onloadedmetadata = function () {
-      const duration = tempVideo.duration;
-
-      const MAX_DURATION_SECONDS = 30 * 60;
-
-      if (duration > MAX_DURATION_SECONDS) {
-        URL.revokeObjectURL(objectUrl);
-
-        showError(
-          'Video duration must not exceed 30 minutes.'
-        );
-
-        return;
-      }
-
-      currentVideoFile = file;
-      currentVideoDuration = duration;
-      currentObjectUrl = objectUrl;
-      if (fileNameDisplay) {
-        fileNameDisplay.textContent = file.name;
-      }
-
-      if (fileSizeDisplay) {
-        fileSizeDisplay.textContent = formatBytes(file.size);
-      }
-
-      if (fileDurationDisplay) {
-        fileDurationDisplay.textContent =
-          `Duration: ${formatDuration(duration)}`;
-      }
-
-      if (previewVideo) {
-        previewVideo.src = objectUrl;
-      }
-
-      if (dropzone) {
-        dropzone.style.display = 'none';
-      }
-
-      if (previewCard) {
-        previewCard.style.display = 'block';
-      }
-    };
-
-    tempVideo.onerror = function () {
-      URL.revokeObjectURL(objectUrl);
-
-      showError(
-        'Could not read the video file. Please select a valid MP4 video.'
-      );
-    };
-
-    tempVideo.src = objectUrl;
-  }
-
-  if (browseBtn && fileInput) {
-    browseBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      fileInput.click();
-    });
-  }
-
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      if (
-        e.target.files &&
-        e.target.files.length > 0
-      ) {
-        handleFile(e.target.files[0]);
-      }
-    });
-  }
-
-  if (dropzone) {
-
-    dropzone.addEventListener('click', () => {
-      if (fileInput) {
-        fileInput.click();
-      }
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length) {
+            selectVideo(fileInput.files[0]);
+        }
     });
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-
-      dropzone.addEventListener(eventName, (e) => {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        dropzone.classList.add('drag-over');
-
-      });
-
+    dropzone.addEventListener("dragover", event => {
+        event.preventDefault();
+        dropzone.classList.add("drag-over");
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-
-      dropzone.addEventListener(eventName, (e) => {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        dropzone.classList.remove('drag-over');
-
-      });
-
+    dropzone.addEventListener("dragleave", () => {
+        dropzone.classList.remove("drag-over");
     });
 
-    dropzone.addEventListener('drop', (e) => {
+    dropzone.addEventListener("drop", event => {
+        event.preventDefault();
+        dropzone.classList.remove("drag-over");
 
-      if (
-        e.dataTransfer &&
-        e.dataTransfer.files &&
-        e.dataTransfer.files.length > 0
-      ) {
-
-        handleFile(
-          e.dataTransfer.files[0]
-        );
-
-      }
-
+        const file = event.dataTransfer.files[0];
+        if (file) selectVideo(file);
     });
-  }
 
-  if (removeVideoBtn) {
-    removeVideoBtn.addEventListener(
-      'click',
-      resetUpload
-    );
-  }
+    removeButton.addEventListener("click", clearVideo);
 
-  if (startProcessingBtn) {
+    uploadButton.addEventListener("click", uploadVideo);
 
-    startProcessingBtn.addEventListener(
-      'click',
-      async () => {
+    function selectVideo(file) {
+        hideError();
 
-        if (!currentVideoFile) {
-
-          showError(
-            'Please select an MP4 video to continue.'
-          );
-
-          return;
+        if (!file.name.toLowerCase().endsWith(".mp4") ||
+            (file.type && file.type !== "video/mp4")) {
+            showError("Only MP4 videos are supported.");
+            return;
         }
 
-        startProcessingBtn.disabled = true;
-        startProcessingBtn.textContent = 'Uploading...';
+        selectedFile = file;
 
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(file);
+
+        previewName.textContent = file.name;
+        previewSize.textContent = formatBytes(file.size);
+        previewDuration.textContent = "Checking duration...";
+
+        previewPlayer.src = previewUrl;
+        previewCard.style.display = "block";
+        dropzone.style.display = "none";
+
+        previewPlayer.onloadedmetadata = () => {
+            const duration = previewPlayer.duration;
+
+            if (!Number.isFinite(duration)) {
+                showError("Could not determine the video duration.");
+                clearVideo();
+                return;
+            }
+
+            if (duration > 30 * 60) {
+                showError("The video must be 30 minutes or shorter.");
+                clearVideo();
+                return;
+            }
+
+            previewDuration.textContent = `Duration: ${formatDuration(duration)}`;
+        };
+
+        previewPlayer.onerror = () => {
+            showError("Could not load the video preview. Select a valid MP4 file.");
+            clearVideo();
+        };
+    }
+
+    async function uploadVideo() {
+        if (!selectedFile) {
+            showError("Choose a video before starting processing.");
+            return;
+        }
+
+        // Do not upload until the browser has checked the video duration.
+        if (!Number.isFinite(previewPlayer.duration)) {
+            showError("Wait for the video duration to be checked.");
+            return;
+        }
+
+        if (previewPlayer.duration > 30 * 60) {
+            showError("The video must be 30 minutes or shorter.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("video", selectedFile);
+
+        uploadButton.disabled = true;
+        uploadButton.textContent = "Uploading and generating blog...";
         hideError();
 
         try {
+            const response = await fetch(`${API_BASE}/upload`, {
+                method: "POST",
+                credentials: "include",
+                body: formData
+            });
 
-          const formData = new FormData();
+            const result = await response.json();
 
-          formData.append(
-            'video',
-            currentVideoFile
-          );
-         const response = await fetch('http://127.0.0.1:5000/upload', {
-          method: 'POST',
-          credentials: 'include',
-          body: formData
-          });
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Video processing failed.");
+            }
 
-          const result = await response.json();
+            if (!result.blog) {
+                throw new Error("The server did not return the generated blog.");
+            }
 
-          if (
-            !response.ok ||
-            !result.success
-          ) {
+            VideoBlogStore.setCurrentBlog(result.blog);
+            VideoBlogStore.setTempUploadedVideo({
+                name: result.filename || selectedFile.name,
+                duration: result.duration_seconds,
+                public_id: result.public_id,
+                video_url: result.video_url,
+                blog_id: result.blog.blog_id
+            });
 
-            throw new Error(
-              result.message ||
-              'Video upload failed.'
-            );
-          }
-
-       
-          VideoBlogStore.setTempUploadedVideo({
-
-            name: result.filename,
-
-            size: formatBytes(
-              currentVideoFile.size
-            ),
-
-            duration: result.duration_seconds,
-
-            public_id: result.public_id,
-
-            video_url: result.video_url,
-
-            audio_file: result.audio_file,
-
-            uploadedAt:
-              new Date().toLocaleDateString(
-                'en-GB',
-                {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                }
-              )
-
-          });
-
-          window.location.href =
-            'processing.html';
-
+            window.location.href =
+                `blog.html?id=${encodeURIComponent(result.blog.blog_id)}`;
         } catch (error) {
+            showError(error.message || "Something went wrong during upload.");
+            uploadButton.disabled = false;
+            uploadButton.textContent = "Start Processing →";
+        }
+    }
 
-          console.error(
-            'Video upload error:',
-            error
-          );
+    function clearVideo() {
+        selectedFile = null;
+        fileInput.value = "";
 
-          showError(
-            error.message ||
-            'Could not upload the video.'
-          );
+        previewPlayer.pause();
+        previewPlayer.removeAttribute("src");
+        previewPlayer.load();
 
-          startProcessingBtn.disabled = false;
-
-          startProcessingBtn.textContent =
-            'Start Processing →';
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
         }
 
-      }
-    );
+        previewCard.style.display = "none";
+        dropzone.style.display = "";
+        hideError();
+    }
 
-  }
+    function showError(message) {
+        errorText.textContent = message;
+        errorAlert.style.display = "flex";
+    }
 
+    function hideError() {
+        errorAlert.style.display = "none";
+        errorText.textContent = "";
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024 * 1024) {
+            return `${(bytes / 1024).toFixed(1)} KB`;
+        }
+
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function formatDuration(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+
+        return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+    }
 });
