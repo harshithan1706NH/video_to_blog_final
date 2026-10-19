@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Edit Video Blog Content - Video Blog Content</title>
+
+  <meta
+    name="description"
+    content="Edit and refine the generated video blog content."
+  />
+
+  <link rel="icon" type="image/png" href="logo-icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="navbar">
+
+    <div class="container navbar-container">
+
+      <a href="dashboard.html" class="navbar-brand">
+        <img
+          src="logo-icon.png"
+          alt="Video Blog Content Logo"
+        />
+        <span>Video Blog Content</span>
+      </a>
+
+      <button class="mobile-menu-btn" aria-label="Toggle Navigation">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+        <li><a href="upload.html" class="nav-link">Upload Video</a></li>
+        <li><a href="my-blogs.html" class="nav-link">My Blogs</a></li>
+        <li><a href="profile.html" class="nav-link">Profile</a></li>
+        <li>
+          <a href="login.html" class="btn btn-sm btn-secondary">
+            Logout
+          </a>
+        </li>
+      </ul>
+
+    </div>
+
+  </header>
+
+  <main class="main-content">
+
+    <div class="container container-narrow">
+
+      <div style="margin-bottom: 1.25rem;">
+
+        <a
+          href="blog.html"
+          class="nav-link"
+          style="
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+          "
+        >
+          ← Back to Video Blog Content
+        </a>
+
+      </div>
+
+      <div class="editor-card">
+
+        <div
+          class="section-header"
+          style="
+            text-align: left;
+            margin-bottom: 2rem;
+          "
+        >
+          <h1>Edit Video Blog Content</h1>
+
+          <p>
+            Modify and refine the generated video blog content
+            before finalizing or downloading.
+          </p>
+        </div>
+
+        <form id="edit-blog-form">
+
+          <div class="form-group">
+
+            <label
+              for="edit-title"
+              class="form-label"
+            >
+              Video Blog Title
+              <span class="required">*</span>
+            </label>
+
+            <input
+              type="text"
+              id="edit-title"
+              class="form-control"
+              placeholder="Enter video blog title"
+              required
+            />
+
+          </div>
+
+          <div class="form-group">
+
+            <label
+              for="edit-intro"
+              class="form-label"
+            >
+              Introduction
+              <span class="required">*</span>
+            </label>
+
+            <textarea
+              id="edit-intro"
+              class="form-control"
+              rows="4"
+              placeholder="Enter introductory paragraph"
+              required
+            ></textarea>
+
+          </div>
+
+          <div class="form-group">
+
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 0.75rem;
+              "
+            >
+
+              <label
+                class="form-label"
+                style="margin-bottom: 0;"
+              >
+                Main Sections
+              </label>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline"
+                id="btn-add-section"
+              >
+                ➕ Add Section
+              </button>
+
+            </div>
+
+            <div id="edit-sections-wrapper">
+            </div>
+
+          </div>
+
+          <div class="form-group">
+
+            <label
+              for="edit-points"
+              class="form-label"
+            >
+              Important Points (One per line)
+            </label>
+
+            <textarea
+              id="edit-points"
+              class="form-control"
+              rows="4"
+              placeholder="Enter key takeaways (one bullet per line)"
+            ></textarea>
+
+            <div class="form-help">
+              Enter each key takeaway on a new line.
+            </div>
+
+          </div>
+
+          <div class="form-group">
+
+            <label
+              for="edit-conclusion"
+              class="form-label"
+            >
+              Conclusion
+              <span class="required">*</span>
+            </label>
+
+            <textarea
+              id="edit-conclusion"
+              class="form-control"
+              rows="4"
+              placeholder="Enter concluding thoughts"
+              required
+            ></textarea>
+
+          </div>
+
+          <div class="editor-actions-footer">
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="btn-cancel-edit"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              id="btn-save-edit"
+            >
+              Save Changes
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="footer">
+
+    <div class="container footer-content">
+
+      <div class="footer-brand-info">
+
+        <img
+          src="logo-icon.png"
+          alt="Video Blog Content"
+          width="28"
+          height="28"
+        />
+
+        <span>Video Blog Content</span>
+
+      </div>
+
+      <p class="footer-text">
+        &copy; 2026 Video Blog Content. Frontend Prototype.
+      </p>
+
+    </div>
+
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="blog.js"></script>
+
+</body>
+</html>
