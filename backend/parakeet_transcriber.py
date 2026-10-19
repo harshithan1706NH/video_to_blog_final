@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+from db import get_db_connection
 import nemo.collections.asr as nemo_asr
 
 MODEL_NAME = "nvidia/parakeet-tdt-0.6b-v2"
@@ -64,7 +65,7 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
         transcript = output[0].text.strip()
 
         transcript_filename = (
-            f"chunk_{index:03d}.txt"
+            f"chunk_{index+1:03d}.txt"
         )
 
         transcript_path = os.path.join(

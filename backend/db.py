@@ -12,22 +12,6 @@ def get_db_connection():
     return connection
 
 
-def save_transcript(video_id, audio_chunk_id, transcript_text):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    cursor.execute(
-        """
-INSERT INTO transcripts (video_id, audio_chunk_id, transcript_text)
-        VALUES (%s, %s, %s)
-        """,
-        (video_id, audio_chunk_id, transcript_text)
-    )
-
-    connection.commit()
-
-    cursor.close()
-    connection.close()
 
 
 

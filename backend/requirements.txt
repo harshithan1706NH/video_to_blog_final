@@ -3,3 +3,5 @@ flask-cors
 cloudinary
 python-dotenv
 Werkzeug
+psycopg2-binary
+requests
