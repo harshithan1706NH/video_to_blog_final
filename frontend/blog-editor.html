@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Blog | Video Blog Content</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 32px 16px;
+            background: #f3f6fa;
+            color: #243447;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 28px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px #00000012;
+        }
+
+        h1 { margin-top: 0; }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 420px;
+            line-height: 1.7;
+            resize: vertical;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        button {
+            padding: 11px 17px;
+            border: 0;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button.secondary { background: #475569; }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #status {
+            min-height: 24px;
+            margin-top: 18px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 18px; }
+            .actions button { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <a class="back-link" href="my-blogs.html">← Back to My Blogs</a>
+
+        <h1>Edit Your Blog</h1>
+        <p>Edit your generated blog, save changes, or download a copy.</p>
+
+        <form id="blogForm">
+            <label for="blogTitle">Blog Title</label>
+            <input
+                id="blogTitle"
+                type="text"
+                maxlength="300"
+                required
+                placeholder="Enter blog title"
+            >
+
+            <label for="blogContent">Blog Content</label>
+            <textarea
+                id="blogContent"
+                required
+                placeholder="Your blog content will appear here"
+            ></textarea>
+
+            <div class="actions">
+                <button id="saveButton" type="submit">Save Changes</button>
+                <button id="docxButton" class="secondary" type="button">
+                    Export Word (.docx)
+                </button>
+                <button id="pdfButton" class="secondary" type="button">
+                    Export PDF
+                </button>
+            </div>
+        </form>
+
+        <p id="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="blog-editor.js"></script>
+</body>
+</html>
