@@ -284,37 +284,48 @@ document.addEventListener('DOMContentLoaded', () => {
             );
           }
 
-       
-          VideoBlogStore.setTempUploadedVideo({
 
-            name: result.filename,
+          const videoInfo = result.video || {};
+          const blogInfo = result.blog || {};
 
-            size: formatBytes(
-              currentVideoFile.size
-            ),
+          const uploadedAt = new Date().toLocaleDateString(
+            'en-GB',
+            { day: 'numeric', month: 'long', year: 'numeric' }
+          );
 
-            duration: result.duration_seconds,
+          const videoData = {
+            name: videoInfo.filename || currentVideoFile.name,
+            size: formatBytes(currentVideoFile.size),
+            duration: videoInfo.duration_seconds || 0,
+            public_id: videoInfo.video_id || null,
+            video_url: videoInfo.cloudinary_url || '',
+            audio_file: result.audio_path || '',
+            uploadedAt: uploadedAt
+          };
 
-            public_id: result.public_id,
+          VideoBlogStore.setTempUploadedVideo(videoData);
 
-            video_url: result.video_url,
+          if (blogInfo.blog_id) {
 
-            audio_file: result.audio_file,
+            const blogEntry = {
+              blog_id: blogInfo.blog_id,
+              id: blogInfo.blog_id,
+              title: blogInfo.title || 'Generated Blog',
+              content: blogInfo.content || '',
+              created_at: blogInfo.created_at || new Date().toISOString(),
+              updated_at: blogInfo.updated_at || new Date().toISOString(),
+              sourceVideo: videoData.name,
+              date: uploadedAt,
+              status: 'Published'
+            };
 
-            uploadedAt:
-              new Date().toLocaleDateString(
-                'en-GB',
-                {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                }
-              )
+            VideoBlogStore.setCurrentBlog(blogEntry);
+            VideoBlogStore.addBlog(blogEntry);
 
-          });
+          }
 
           window.location.href =
-            'processing.html';
+            'dashboard.html';
 
         } catch (error) {
 
