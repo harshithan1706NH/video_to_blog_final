@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Video to Blog Content</title>
+    <title>Video Blog Content</title>
 
     <style>
         * {
@@ -17,6 +15,7 @@
 
         body {
             min-height: 100vh;
+            padding: 24px;
             background: #f5f7fb;
             display: flex;
             justify-content: center;
@@ -24,45 +23,77 @@
         }
 
         .logo-page {
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
             text-align: center;
-            background: white;
-            padding: 50px;
-            border-radius: 15px;
+            background: #ffffff;
+            border-radius: 16px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
         }
 
         .logo-page img {
-            width: 300px;
-            height: auto;
             display: block;
-            margin: 0 auto 25px;
+            width: 100%;
+            max-width: 750px;
+            height: auto;
+            margin: 0 auto 24px;
+            object-fit: contain;
         }
 
         .logo-page h1 {
-            font-size: 28px;
-            color: #222;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            color: #1e293b;
+            font-size: 30px;
         }
 
         .logo-page p {
-            color: #777;
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .start-button {
+            display: inline-block;
+            margin-top: 26px;
+            padding: 13px 26px;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #ffffff;
             font-size: 15px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .start-button:hover {
+            background: #1d4ed8;
+        }
+
+        @media (max-width: 600px) {
+            .logo-page {
+                padding: 24px 18px;
+            }
+
+            .logo-page h1 {
+                font-size: 24px;
+            }
+
+            .logo-page p {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <main class="logo-page">
+        <img src="assets/logo-icon.png" alt="Video Blog Content Logo">
 
-    <div class="logo-page">
+        <h1>Video Blog Content</h1>
 
-        <img src="assets/logo.png" alt="Video to Blog Logo">
+        <p>Turn videos into structured blog content automatically.</p>
 
-        <h1>Video to Blog</h1>
-
-        <p>Turn videos into structured blog content</p>
-
-    </div>
-
+        <a href="login.html" class="start-button">Get Started</a>
+    </main>
 </body>
-
 </html>

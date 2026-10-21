@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Blog | Video Blog Content</title>
+    <title>Edit Blog Content | Video Blog Content</title>
 
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -26,7 +28,9 @@
             box-shadow: 0 4px 18px #00000012;
         }
 
-        h1 { margin-top: 0; }
+        h1 {
+            margin-top: 0;
+        }
 
         label {
             display: block;
@@ -34,7 +38,8 @@
             font-weight: bold;
         }
 
-        input, textarea {
+        input,
+        textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #cbd5e1;
@@ -65,7 +70,9 @@
             cursor: pointer;
         }
 
-        button.secondary { background: #475569; }
+        button.secondary {
+            background: #475569;
+        }
 
         button:disabled {
             opacity: 0.6;
@@ -85,23 +92,29 @@
         }
 
         @media (max-width: 600px) {
-            .container { padding: 18px; }
-            .actions button { width: 100%; }
+            .container {
+                padding: 18px;
+            }
+
+            .actions button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
     <main class="container">
-        <a class="back-link" href="my-blogs.html">← Back to My Blogs</a>
+        <a class="back-link" href="my-blogs.html">← Back to My Blog Content</a>
 
-        <h1>Edit Your Blog</h1>
-        <p>Edit your generated blog, save changes, or download a copy.</p>
+        <h1>Edit Your Blog Content</h1>
+        <p>Edit your generated blog content, save changes, or download a copy.</p>
 
         <form id="blogForm">
-            <label for="blogTitle">Blog Title</label>
+            <label for="blogTitle">Title</label>
             <input
                 id="blogTitle"
+                name="title"
                 type="text"
                 maxlength="300"
                 required
@@ -111,6 +124,7 @@
             <label for="blogContent">Blog Content</label>
             <textarea
                 id="blogContent"
+                name="content"
                 required
                 placeholder="Your blog content will appear here"
             ></textarea>

@@ -1,5 +1,5 @@
 
-const API_BASE = "http://127.0.0.1:5001";
+const API_BASE = "http://127.0.0.1:5000";
 
 const form = document.getElementById("blogForm");
 const titleInput = document.getElementById("blogTitle");
@@ -12,10 +12,20 @@ const pdfButton = document.getElementById("pdfButton");
 const blogId = new URLSearchParams(window.location.search).get("id");
 
 let saving = false;
+let originalTitle = "";
+let originalContent = "";
 
 function setStatus(message, error = false) {
+    if (!statusElement) return;
+
     statusElement.textContent = message;
     statusElement.style.color = error ? "#b91c1c" : "#166534";
+}
+
+function disableControls() {
+    if (saveButton) saveButton.disabled = true;
+    if (docxButton) docxButton.disabled = true;
+    if (pdfButton) pdfButton.disabled = true;
 }
 
 async function requestApi(path, options = {}) {
@@ -28,23 +38,28 @@ async function requestApi(path, options = {}) {
         }
     });
 
-    if (!response.ok) {
-        let message = `Request failed (${response.status})`;
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : null;
 
-        try {
-            const data = await response.json();
-            message = data.error || message;
-        } catch (_) {}
-
-        throw new Error(message);
+    if (response.status === 401) {
+        window.location.href = "login.html";
+        throw new Error("Please log in to continue.");
     }
 
-    return response;
+    if (!response.ok) {
+        throw new Error(
+            data?.error || `Request failed (${response.status}).`
+        );
+    }
+
+    return { response, data };
 }
 
 async function loadBlog() {
     if (!blogId || !/^\d+$/.test(blogId)) {
-        setStatus("Invalid blog ID. Open the editor with ?id=YOUR_BLOG_ID.", true);
+        setStatus("Invalid blog ID.", true);
         disableControls();
         return;
     }
@@ -52,55 +67,68 @@ async function loadBlog() {
     try {
         setStatus("Loading blog...");
 
-        const response = await requestApi(
-            `/api/blogs/${encodeURIComponent(blogId)}`
+        const { data } = await requestApi("/blogs");
+
+        const blogs = Array.isArray(data.blogs) ? data.blogs : [];
+        const blog = blogs.find(
+            item => String(item.blog_id) === blogId
         );
 
-        const data = await response.json();
+        if (!blog) {
+            throw new Error("Blog not found.");
+        }
 
-        titleInput.value = data.blog.title || "";
-        contentInput.value = data.blog.content || "";
+        titleInput.value = blog.title || "";
+        contentInput.value = blog.content || "";
 
-        setStatus("Blog loaded.");
+        originalTitle = titleInput.value;
+        originalContent = contentInput.value;
+
+        setStatus("Blog Content loaded.");
     } catch (error) {
         setStatus(error.message, true);
+        disableControls();
     }
-}
-
-function disableControls() {
-    saveButton.disabled = true;
-    docxButton.disabled = true;
-    pdfButton.disabled = true;
 }
 
 async function saveBlog() {
     if (saving) return false;
 
     const title = titleInput.value.trim();
-    const content = contentInput.value;
+    const content = contentInput.value.trim();
 
-    if (!title || !content.trim()) {
+    if (!title || !content) {
         setStatus("Enter both a title and content before saving.", true);
         return false;
     }
 
+    if (title === originalTitle && content === originalContent) {
+        setStatus("No changes to save.");
+        return true;
+    }
+
     saving = true;
-    saveButton.disabled = true;
+
+    if (saveButton) saveButton.disabled = true;
+
     setStatus("Saving...");
 
     try {
-        const response = await requestApi(
-            `/api/blogs/${encodeURIComponent(blogId)}`,
+        const { data } = await requestApi(
+            `/blogs/${encodeURIComponent(blogId)}`,
             {
                 method: "PUT",
                 body: JSON.stringify({ title, content })
             }
         );
 
-        const data = await response.json();
+        const blog = data.blog;
 
-        titleInput.value = data.blog.title;
-        contentInput.value = data.blog.content;
+        originalTitle = blog?.title ?? title;
+        originalContent = blog?.content ?? content;
+
+        titleInput.value = originalTitle;
+        contentInput.value = originalContent;
 
         setStatus("Blog saved successfully.");
         return true;
@@ -109,14 +137,19 @@ async function saveBlog() {
         return false;
     } finally {
         saving = false;
-        saveButton.disabled = false;
+
+        if (saveButton) {
+            saveButton.disabled = false;
+        }
     }
 }
 
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await saveBlog();
-});
+if (form) {
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        await saveBlog();
+    });
+}
 
 async function exportBlog(format) {
     if (!blogId) {
@@ -124,18 +157,19 @@ async function exportBlog(format) {
         return;
     }
 
-    
-    const saved = await saveBlog();
-    if (!saved) return;
-
     const button = format === "docx" ? docxButton : pdfButton;
-    button.disabled = true;
+
+    if (button) button.disabled = true;
 
     try {
+        const saved = await saveBlog();
+
+        if (!saved) return;
+
         setStatus(`Preparing ${format.toUpperCase()} file...`);
 
-        const response = await requestApi(
-            `/api/blogs/${encodeURIComponent(blogId)}/export/${format}`
+        const { response } = await requestApi(
+            `/blogs/${encodeURIComponent(blogId)}/export/${format}`
         );
 
         const blob = await response.blob();
@@ -144,20 +178,27 @@ async function exportBlog(format) {
 
         link.href = url;
         link.download = `blog_${blogId}.${format}`;
+
         document.body.appendChild(link);
         link.click();
         link.remove();
 
         URL.revokeObjectURL(url);
+
         setStatus(`${format.toUpperCase()} export started.`);
     } catch (error) {
         setStatus(error.message, true);
     } finally {
-        button.disabled = false;
+        if (button) button.disabled = false;
     }
 }
 
-docxButton.addEventListener("click", () => exportBlog("docx"));
-pdfButton.addEventListener("click", () => exportBlog("pdf"));
+if (docxButton) {
+    docxButton.addEventListener("click", () => exportBlog("docx"));
+}
+
+if (pdfButton) {
+    pdfButton.addEventListener("click", () => exportBlog("pdf"));
+}
 
 loadBlog();

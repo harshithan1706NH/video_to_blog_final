@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Blog Content | Video Blog Content</title>
+    <link rel="icon" type="image/png" href="assets/logo-icon.png">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .blog-view-container {
+            max-width: 1000px;
+            margin: 36px auto;
+            padding: 32px;
+            background: #fff;
+            border: 1px solid #dbe3ee;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px #0000000d;
+        }
+
+        .blog-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            margin: 12px 0 28px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .blog-body {
+            line-height: 1.85;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            font-size: 16px;
+        }
+
+        .blog-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .blog-actions a {
+            text-decoration: none;
+        }
+
+        #blog-error {
+            color: #b91c1c;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .blog-view-container {
+                margin: 20px 12px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <img src="assets/logo-icon.png" alt="Video Blog Content Logo">
+                <span>Video Blog Content</span>
+            </a>
+
+            <button class="mobile-menu-btn" type="button" aria-label="Toggle Navigation">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+            <ul class="nav-links">
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="upload.html" class="nav-link">Upload Video</a></li>
+                <li><a href="my-blogs.html" class="nav-link">My Blog Content</a></li>
+                <li><a href="login.html" class="btn btn-sm btn-secondary">Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container">
+        <article id="blog-view-container" class="blog-view-container">
+            <a href="my-blogs.html" class="nav-link">← Back to My Blog Content</a>
+
+            <h1 id="blog-display-title" style="margin-top: 20px;">Loading blog content...</h1>
+
+            <div class="blog-meta">
+                <span id="blog-display-source"></span>
+                <span id="blog-display-date"></span>
+            </div>
+
+            <div id="blog-display-content" class="blog-body">Loading content...</div>
+            <p id="blog-error" role="alert" hidden></p>
+
+            <div class="blog-actions">
+                <a id="btn-edit-blog" href="my-blogs.html" class="btn btn-primary">Edit Blog Content</a>
+                <a href="my-blogs.html" class="btn btn-secondary">Back to My Blog Content</a>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand-info">
+                <img src="assets/logo-icon.png" alt="Video Blog Content" width="28" height="28">
+                <span>Video Blog Content</span>
+            </div>
+            <p class="footer-text">&copy; 2026 Video Blog Content.</p>
+        </div>
+    </footer>
+
+    <script src="blog.js"></script>
+</body>
+</html>

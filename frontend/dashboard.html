@@ -1,188 +1,92 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Dashboard - Video Blog Content</title>
-
-  <meta
-    name="description"
-    content="View your generated video blog content, upload new videos, and manage your content."
-  />
-
-  <link rel="icon" type="image/png" href="assets/logo-icon.png" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Video Blog Content</title>
+    <meta name="description" content="Upload videos, generate structured blog content, and manage your saved content.">
+    <link rel="icon" type="image/png" href="assets/logo-icon.png">
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+    <header class="navbar">
+        <div class="container navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <img src="assets/logo-icon.png" alt="Video Blog Content Logo">
+                <span>Video Blog Content</span>
+            </a>
 
-  <header class="navbar">
+            <button class="mobile-menu-btn" aria-label="Toggle Navigation">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
 
-    <div class="container navbar-container">
-
-      <a href="dashboard.html" class="navbar-brand">
-        <img
-          src="assets/logo-icon.png"
-          alt="Video Blog Content Logo"
-        />
-        <span>Video Blog Content</span>
-      </a>
-
-      <button class="mobile-menu-btn" aria-label="Toggle Navigation">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
-
-      <ul class="nav-links">
-        <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-        <li><a href="upload.html" class="nav-link">Upload Video</a></li>
-        <li><a href="my-blogs.html" class="nav-link">My Blogs</a></li>
-        <li><a href="profile.html" class="nav-link">Profile</a></li>
-        <li>
-          <a href="login.html" class="btn btn-sm btn-secondary">
-            Logout
-          </a>
-        </li>
-      </ul>
-
-    </div>
-
-  </header>
-
-  <main class="main-content">
-
-    <div class="container">
-
-      <div class="dashboard-header">
-
-        <div class="dashboard-title-area">
-          <h1>
-            Welcome,
-            <span id="dashboard-user-name">User</span>
-          </h1>
+            <ul class="nav-links">
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="upload.html" class="nav-link">Upload Video</a></li>
+                <li><a href="my-blogs.html" class="nav-link">My Blog Content</a></li>
+                <li><a href="login.html" class="btn btn-sm btn-secondary">Logout</a></li>
+            </ul>
         </div>
+    </header>
 
-        <div>
-          <a
-            href="upload.html"
-            class="btn btn-primary btn-lg"
-            id="dashboard-upload-btn"
-          >
-            <span>➕</span>
-            Upload New Video
-          </a>
+    <main class="main-content">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="dashboard-title-area">
+                    <h1>Welcome, <span id="dashboard-user-name">User</span></h1>
+                    <p>Turn your videos into structured blog content.</p>
+                </div>
+
+                <div>
+                    <a href="upload.html" class="btn btn-primary btn-lg" id="dashboard-upload-btn">
+                        <span>➕</span>
+                        Upload New Video
+                    </a>
+                </div>
+            </div>
+
+            <section class="card" style="margin-top: 1.5rem;">
+                <div class="card-header">
+                    <div>
+                        <h2>Recent Blog Content</h2>
+                        <p style="color: var(--color-text-secondary); font-size: 0.9rem;">
+                            Recently generated content from your uploaded videos.
+                        </p>
+                    </div>
+
+                    <a href="my-blogs.html" class="btn btn-sm btn-outline">
+                        View All Content
+                    </a>
+                </div>
+
+                <div class="blogs-list" id="dashboard-recent-blogs"></div>
+
+                <div class="empty-state-card" id="dashboard-empty-state" style="display: none;">
+                    <div class="empty-state-icon">📄</div>
+                    <h3>No blog content yet</h3>
+                    <p>Upload an MP4 video to generate structured blog content automatically.</p>
+                    <a href="upload.html" class="btn btn-primary">Upload Video</a>
+                </div>
+            </section>
         </div>
+    </main>
 
-      </div>
-
-      <section
-        class="card"
-        style="margin-top: 1.5rem;"
-      >
-
-        <div class="card-header">
-
-          <div>
-            <h2>Recent Video Blog Content</h2>
-
-            <p
-              style="
-                color: var(--color-text-secondary);
-                font-size: 0.9rem;
-              "
-            >
-              Your recently transformed video blog content.
-            </p>
-          </div>
-
-          <a
-            href="my-blogs.html"
-            class="btn btn-sm btn-outline"
-          >
-            View All Video Blog Content
-          </a>
-
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand-info">
+                <img src="assets/logo-icon.png" alt="Video Blog Content" width="28" height="28">
+                <span>Video Blog Content</span>
+            </div>
+            <p class="footer-text">&copy; 2026 Video Blog Content.</p>
         </div>
+    </footer>
 
-        <div
-          class="blogs-list"
-          id="dashboard-recent-blogs"
-        >
-        </div>
-
-        <div
-          class="empty-state-card"
-          id="dashboard-empty-state"
-          style="display: none;"
-        >
-
-          <div class="empty-state-icon">📄</div>
-
-          <h3>
-            No video blog content yet?
-            Upload your first video.
-          </h3>
-
-          <p>
-            Select an MP4 video to start generating structured
-            video blog content automatically.
-          </p>
-
-          <a
-            href="upload.html"
-            class="btn btn-primary"
-          >
-            Upload Video
-          </a>
-
-        </div>
-
-      </section>
-
-    </div>
-
-  </main>
-
-  <footer class="footer">
-
-    <div class="container footer-content">
-
-      <div class="footer-brand-info">
-
-        <img
-          src="assets/logo-icon.png"
-          alt="Video Blog Content"
-          width="28"
-          height="28"
-        />
-
-        <span>Video Blog Content</span>
-
-      </div>
-
-      <p class="footer-text">
-        &copy; 2026 Video Blog Content. Frontend Prototype.
-      </p>
-
-    </div>
-
-  </footer>
-
-  <script src="app.js"></script>
-  <script src="dashboard.js"></script>
-
+    <script src="app.js"></script>
+    <script src="dashboard.js"></script>
 </body>
 </html>
