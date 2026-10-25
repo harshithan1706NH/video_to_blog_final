@@ -13,7 +13,7 @@ app.secret_key = os.getenv(
     "development-secret-key"
 )
 
-
+allowed_origins = [
     origin.strip()
     for origin in os.getenv(
         "EDITOR_ALLOWED_ORIGINS",

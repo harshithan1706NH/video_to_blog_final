@@ -18,11 +18,13 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
         exist_ok=True
     )
 
-    chunk_files = sorted(
-        filename
-        for filename in os.listdir(chunks_folder)
-        if filename.endswith(".wav")
-    )
+    chunk_files = []
+
+    for filename in os.listdir(chunks_folder):
+        if filename.endswith(".wav"):
+            chunk_files.append(filename)
+
+    chunk_files = sorted(chunk_files)
 
     if not chunk_files:
         raise RuntimeError(
@@ -41,7 +43,7 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
     )
 
     print(
-        f"Parakeet model loaded. "
+        "Parakeet model loaded. "
         f"{len(chunk_files)} chunks found.",
         flush=True
     )
