@@ -1,11 +1,10 @@
-﻿
-import os
+﻿import os
 import sys
 import uuid
 import subprocess
 from pathlib import Path
 from io import BytesIO
-
+import re
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
@@ -17,6 +16,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from audio_chunker import chunk_audio
 from db import get_db_connection
 from blog_generator import generate_blog, save_blog
+from transcript_cleaner import clean_transcript
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -76,6 +76,29 @@ def signup():
             "error": "Name, email, and password are required.",
         }), 400
 
+    # Validate email format
+    email_pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+
+    if not re.fullmatch(email_pattern, email):
+        return jsonify({
+            "success": False,
+            "error": "Please enter a valid email address.",
+        }), 400
+
+    # Validate password
+    password_pattern = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{6}$"
+
+    if not re.fullmatch(password_pattern, password):
+        return jsonify({
+            "success": False,
+            "error": (
+                "Password must be exactly 6 characters long "
+                "and contain at least one uppercase letter, "
+                "one lowercase letter, and one number. "
+                "Special characters are not allowed."
+            ),
+        }), 400
+
     connection = None
     cursor = None
 
@@ -105,11 +128,6 @@ def signup():
 
         user_id = cursor.fetchone()[0]
         connection.commit()
-
-        session.clear()
-        session["user_id"] = user_id
-        session["user_name"] = name
-        session["user_email"] = email
 
         return jsonify({
             "success": True,
@@ -373,42 +391,50 @@ def upload_video():
         if not audio_chunks:
             raise RuntimeError("Audio chunking did not produce any chunks.")
 
-        transcript_parts = []
+                
+        audio_chunks = sorted(audio_chunks, key=lambda path: Path(path).name)
+
+        chunks_folder = Path(audio_chunks[0]).parent
+        transcripts_folder = AUDIO_DIR / f"{uuid.uuid4().hex}_transcripts"
+        transcripts_folder.mkdir(parents=True, exist_ok=True)
+
+        
+        chunk_ids = []
 
         for index, chunk in enumerate(audio_chunks):
-            chunk_path = Path(chunk)
-            transcript_path = AUDIO_DIR / f"{uuid.uuid4().hex}_transcript.txt"
-            transcript_outputs.append(transcript_path)
-
             cursor.execute(
                 """
                 INSERT INTO audio_chunks (video_id, chunk_path, chunk_index)
                 VALUES (%s, %s, %s)
                 RETURNING chunk_id
                 """,
-                (video_id, str(chunk_path), index),
+                (video_id, str(chunk), index),
             )
 
-            chunk_id = cursor.fetchone()[0]
-            connection.commit()
+            chunk_ids.append(cursor.fetchone()[0])
 
-            subprocess.run(
-                [
-                    sys.executable,
-                    str(BASE_DIR / "parakeet_transcriber.py"),
-                    str(chunk_path),
-                    str(transcript_path),
-                ],
-                check=True,
-            )
+        connection.commit()
 
-            transcript_text = ""
+        
+        subprocess.run(
+            [
+                sys.executable,
+                str(BASE_DIR / "parakeet_transcriber.py"),
+                str(chunks_folder),
+                str(transcripts_folder),
+            ],
+            check=True,
+        )
 
-            if transcript_path.exists():
-                transcript_text = transcript_path.read_text(
-                    encoding="utf-8",
-                    errors="replace",
-                ).strip()
+     
+        transcript_parts = []
+
+        for index, chunk_id in enumerate(chunk_ids):
+            transcript_path = transcripts_folder / f"chunk_{index + 1:03d}.txt"
+
+            transcript_text = transcript_path.read_text(
+                encoding="utf-8"
+            ).strip()
 
             cursor.execute(
                 """
@@ -418,23 +444,34 @@ def upload_video():
                 (video_id, chunk_id, transcript_text),
             )
 
-            connection.commit()
-
             if transcript_text:
                 transcript_parts.append(transcript_text)
 
+        connection.commit()
+
+            
         combined_transcript = "\n".join(transcript_parts).strip()
 
         if not combined_transcript:
             raise RuntimeError("Transcription produced no text.")
 
+       
+        cleaned_transcript = clean_transcript(combined_transcript)
+
+        if not cleaned_transcript:
+            raise RuntimeError("Transcript cleaning produced no text.")
+
+       
         cursor.execute(
             "UPDATE videos SET transcript = %s WHERE video_id = %s",
-            (combined_transcript, video_id),
+            (cleaned_transcript, video_id),
         )
         connection.commit()
 
-        title, content = generate_blog(combined_transcript)
+      
+        title, content = generate_blog(cleaned_transcript)
+
+       
 
         saved_blog = save_blog(
             video_id=video_id,
