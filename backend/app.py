@@ -301,6 +301,10 @@ def upload_video():
 
     try:
         video.save(local_video_path)
+        if not local_video_path.exists():
+            raise FileNotFoundError(
+                f"Video missing immediately after saving: {local_video_path}"
+            )
 
         probe = subprocess.run(
             [
@@ -350,14 +354,19 @@ def upload_video():
         cursor.execute(
             """
             INSERT INTO videos (
-                user_id, filename, video_url, duration_seconds
+                user_id,
+                filename,
+                format,
+                cloudinary_url,
+                duration_seconds
             )
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
             RETURNING video_id
             """,
             (
                 session["user_id"],
                 safe_filename,
+                Path(safe_filename).suffix.lstrip(".").lower(),
                 video_url,
                 duration_seconds,
             ),
@@ -367,6 +376,10 @@ def upload_video():
         connection.commit()
 
         audio_path = AUDIO_DIR / f"{uuid.uuid4().hex}.wav"
+        if not local_video_path.exists():
+            raise FileNotFoundError(
+                f"Video missing before audio extraction: {local_video_path}"
+            )
 
         subprocess.run(
             [
@@ -386,29 +399,43 @@ def upload_video():
             check=True,
         )
 
-        audio_chunks = chunk_audio(str(audio_path))
+        chunks_folder = AUDIO_DIR / f"{uuid.uuid4().hex}_chunks"
+        transcripts_folder = AUDIO_DIR / f"{uuid.uuid4().hex}_transcripts"
+
+        audio_chunks = chunk_audio(
+            str(audio_path),
+            str(chunks_folder),
+            duration_seconds
+        )
 
         if not audio_chunks:
             raise RuntimeError("Audio chunking did not produce any chunks.")
 
-                
-        audio_chunks = sorted(audio_chunks, key=lambda path: Path(path).name)
-
-        chunks_folder = Path(audio_chunks[0]).parent
-        transcripts_folder = AUDIO_DIR / f"{uuid.uuid4().hex}_transcripts"
         transcripts_folder.mkdir(parents=True, exist_ok=True)
 
         
         chunk_ids = []
 
-        for index, chunk in enumerate(audio_chunks):
+        for chunk in audio_chunks:
             cursor.execute(
                 """
-                INSERT INTO audio_chunks (video_id, chunk_path, chunk_index)
-                VALUES (%s, %s, %s)
-                RETURNING chunk_id
+                INSERT INTO audio_chunks (
+                    video_id,
+                    chunk_number,
+                    start_time_seconds,
+                    end_time_seconds,
+                    chunk_filename
+                )
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING audio_chunk_id
                 """,
-                (video_id, str(chunk), index),
+                (
+                    video_id,
+                    chunk["chunk_number"],
+                    chunk["start_time_seconds"],
+                    chunk["end_time_seconds"],
+                    chunk["filename"],
+                ),
             )
 
             chunk_ids.append(cursor.fetchone()[0])
@@ -416,20 +443,29 @@ def upload_video():
         connection.commit()
 
         
+        parakeet_python = os.getenv("PARAKEET_PYTHON")
+
+        if not parakeet_python or not Path(parakeet_python).is_file():
+            raise RuntimeError(
+                "PARAKEET_PYTHON is missing or points to an invalid Python executable."
+            )
+
         subprocess.run(
             [
-                sys.executable,
+                parakeet_python,
                 str(BASE_DIR / "parakeet_transcriber.py"),
                 str(chunks_folder),
                 str(transcripts_folder),
             ],
             check=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
      
         transcript_parts = []
 
-        for index, chunk_id in enumerate(chunk_ids):
+        for index, audio_chunk_id in enumerate(chunk_ids):
             transcript_path = transcripts_folder / f"chunk_{index + 1:03d}.txt"
 
             transcript_text = transcript_path.read_text(
@@ -438,10 +474,14 @@ def upload_video():
 
             cursor.execute(
                 """
-                INSERT INTO transcripts (video_id, chunk_id, transcript_text)
+                INSERT INTO transcripts (
+                    video_id,
+                    audio_chunk_id,
+                    transcript_text
+                )
                 VALUES (%s, %s, %s)
                 """,
-                (video_id, chunk_id, transcript_text),
+                (video_id, audio_chunk_id, transcript_text),
             )
 
             if transcript_text:
@@ -463,8 +503,17 @@ def upload_video():
 
        
         cursor.execute(
-            "UPDATE videos SET transcript = %s WHERE video_id = %s",
-            (cleaned_transcript, video_id),
+            """
+            UPDATE videos
+            SET combined_transcript = %s,
+                cleaned_transcript = %s
+            WHERE video_id = %s
+            """,
+            (
+                combined_transcript,
+                cleaned_transcript,
+                video_id,
+            ),
         )
         connection.commit()
 
