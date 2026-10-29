@@ -35,7 +35,7 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
 
     print(
         "Loading Parakeet model...",
-        flush=True
+        
     )
 
     model = nemo_asr.models.ASRModel.from_pretrained(
@@ -45,7 +45,7 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
     print(
         "Parakeet model loaded. "
         f"{len(chunk_files)} chunks found.",
-        flush=True
+        
     )
 
     for index, filename in enumerate(chunk_files):
@@ -57,7 +57,7 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
         print(
             f"Transcribing {filename} "
             f"({index + 1}/{len(chunk_files)})...",
-            flush=True
+            
         )
 
         output = model.transcribe(
@@ -84,12 +84,12 @@ def transcribe_chunks(chunks_folder, transcripts_folder):
 
         print(
             f"Completed {filename}",
-            flush=True
+            
         )
 
     print(
         "All chunks transcribed.",
-        flush=True
+        
     )
 
 

@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const email = registerForm.querySelector('[name="email"]')?.value.trim();
             const password = registerForm.querySelector('[name="password"]')?.value;
             const confirmPassword = registerForm.querySelector(
-                '[name="confirm_password"], [name="confirm-password"], #confirm-password'
+                '[name="confirm-password"]'
             )?.value;
 
             if (password !== confirmPassword) {

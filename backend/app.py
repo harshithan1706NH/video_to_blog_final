@@ -76,7 +76,7 @@ def signup():
             "error": "Name, email, and password are required.",
         }), 400
 
-    # Validate email format
+    
     email_pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 
     if not re.fullmatch(email_pattern, email):
@@ -85,7 +85,7 @@ def signup():
             "error": "Please enter a valid email address.",
         }), 400
 
-    # Validate password
+    
     password_pattern = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{6}$"
 
     if not re.fullmatch(password_pattern, password):
